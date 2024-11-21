@@ -1,0 +1,69 @@
+---
+- name: Create folder and link to GitHub repository
+  hosts: all
+  vars:
+    repo_name: "nazwa_użytkownika"
+    github_url: "link_do_githuba"
+    folder_path: "C:\\ściezka"
+    git_username: "nazwa_użytkownika"
+    git_token: "token"
+
+  tasks:
+    - name: Create the folder
+      win_file:
+        path: "{{ folder_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Initialize Git repository
+      win_command: git init
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Check if remote origin exists
+      win_command: git remote -v
+      args:
+        chdir: "{{ folder_path }}"
+      register: git_remote_check
+      ignore_errors: true
+
+    - name: Remove existing remote origin if it exists
+      win_command: git remote remove origin
+      args:
+        chdir: "{{ folder_path }}"
+      when: "'origin' in git_remote_check.stdout"
+
+    - name: Add remote GitHub repository
+      win_command: git remote add origin {{ github_url }}
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Create a README file
+      win_copy:
+        content: "# {{ repo_name }}\n\nThis is a README file for the {{ repo_name }}."
+        dest: "{{ folder_path }}\\README.md"
+
+    - name: Set Git user name
+      win_command: git config --global user.name "{{ git_username }}"
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Set Git user email
+      win_command: git config --global user.email "mateusz.bogacz-drewniak@studenci.collegiumwitelona.pl"  # Replace with your email
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Add files to Git
+      win_command: git add .
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Commit changes
+      win_command: git commit -m "Initial commit"
+      args:
+        chdir: "{{ folder_path }}"
+
+    - name: Push to GitHub
+      win_command: git push -u https://{{ git_username }}:{{ git_token }}@github.com/mateusz-bogacz-collegiumwitelona/test_ansible.git master
+      args:
+        chdir: "{{ folder_path }}"
