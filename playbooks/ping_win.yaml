@@ -1,6 +1,6 @@
 ---
 - name: Test ping to Windows host
-  hosts: test
+  hosts: all
   tasks:
     - name: Test ping
       win_ping:

@@ -1,0 +1,23 @@
+---
+- name: Install chocolatey and programs
+  hosts: all
+  tasks:
+    - name: Install chocolatey
+      ansible.windows.win_powershell:
+        script: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+    - name: Install programs
+      win_chocolatey:
+        name: '{{ item }}'
+        state: present
+        ignore_checksums: yes
+      loop:
+      - unityhub
+      - blender
+      - krita
+      - firefox
+      - discord
+      - googlechrome
+      - git
+      - visualstudio2022community
