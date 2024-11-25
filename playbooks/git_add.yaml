@@ -1,69 +1,75 @@
 ---
-- name: Create folder and link to GitHub repository
+- name: Set up Git repository with token authentication
   hosts: all
-  vars:
-    repo_name: "nazwa_użytkownika"
-    github_url: "link_do_githuba"
-    folder_path: "C:\\ściezka"
-    git_username: "nazwa_użytkownika"
-    git_token: "token"
-
   tasks:
-    - name: Create the folder
+    - name: Ensure the repository folder exists
       win_file:
-        path: "{{ folder_path }}"
+        path: C:\test_ansible
         state: directory
-        mode: '0755'
 
-    - name: Initialize Git repository
+    - name: Configure Git user name
+      win_command: git config --global user.name "nazwa_użytkownika"
+      args:
+        chdir: C:\test_ansible
+
+    - name: Configure Git user email
+      win_command: git config --global user.email "email"
+      args:
+        chdir: C:\test_ansible
+
+    - name: Configure Git credential helper to store
+      win_command: git config --global credential.helper store
+      args:
+        chdir: C:\test_ansible
+
+    - name: Add GitHub credentials
+      win_shell: |
+        echo https://nazwa_użytkownika:token@github.com > C:/Users/{{ ansible_user }}/.git-credentials
+      args:
+        chdir: C:\test_ansible
+
+    - name: Initialize the Git repository
       win_command: git init
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Check if remote origin exists
-      win_command: git remote -v
+    - name: Add README.md file with dynamic content
+      win_shell: |
+        echo "# test_ansible $(date)" > README.md
       args:
-        chdir: "{{ folder_path }}"
-      register: git_remote_check
-      ignore_errors: true
+        chdir: C:\test_ansible
 
-    - name: Remove existing remote origin if it exists
-      win_command: git remote remove origin
+    - name: Stage README.md
+      win_command: git add README.md
       args:
-        chdir: "{{ folder_path }}"
-      when: "'origin' in git_remote_check.stdout"
+        chdir: C:\test_ansible
 
-    - name: Add remote GitHub repository
-      win_command: git remote add origin {{ github_url }}
+    - name: Check git status
+      win_command: git status
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Create a README file
-      win_copy:
-        content: "# {{ repo_name }}\n\nThis is a README file for the {{ repo_name }}."
-        dest: "{{ folder_path }}\\README.md"
-
-    - name: Set Git user name
-      win_command: git config --global user.name "{{ git_username }}"
+    - name: Commit changes (allow empty commit if no changes)
+      win_command: git commit -m "first commit" --allow-empty
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Set Git user email
-      win_command: git config --global user.email "mateusz.bogacz-drewniak@studenci.collegiumwitelona.pl"  # Replace with your email
+    - name: Set default branch to main
+      win_command: git branch -M main
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Add files to Git
-      win_command: git add .
+    - name: Add remote repository
+      win_command: git remote add origin link do repo
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Commit changes
-      win_command: git commit -m "Initial commit"
+    - name: Disable Git credential manager (optional)
+      win_command: git config --global --unset credential.helper
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
 
-    - name: Push to GitHub
-      win_command: git push -u https://{{ git_username }}:{{ git_token }}@github.com/mateusz-bogacz-collegiumwitelona/test_ansible.git master
+    - name: Push changes to remote repository
+      win_command: git push -u https:/nazwa_użytkownika:token@github.com/nazwa_użytkownika/nazwa_repo.git main
       args:
-        chdir: "{{ folder_path }}"
+        chdir: C:\test_ansible
