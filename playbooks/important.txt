@@ -1,1 +1,4 @@
 https://github.com/AlbanAndrieu/ansible-windows/blob/master/files/ConfigureRemotingForAnsible.ps1
+
+ansible-playbook -i [ścieżka_do_inventory] [ścieżka_do_playbook]
+
