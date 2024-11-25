@@ -1,0 +1,28 @@
+---
+- name: Push files to GitHub from Windows
+  hosts: all
+  tasks:
+    - name: Ensure the repository folder exists
+      win_file:
+        path: C:\test_ansible
+        state: directory
+
+    - name: Get current date and time from Windows
+      win_command: powershell -Command "Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'"
+      register: current_datetime
+      when: ansible_facts['os_family'] == 'Windows'
+
+    - name: Stage files
+      win_command: git add .
+      args:
+        chdir: C:\test_ansible
+
+    - name: Commit changes
+      win_command: git commit -m "{{ current_datetime.stdout }} (ansible auto add to git)" --allow-empty
+      args:
+        chdir: C:\test_ansible
+
+    - name: Push changes to remote repository
+      win_command: git push -u https://nazwa_użytkownika:token@github.com/mateusz-bogacz-collegiumwitelona/test_ansible.git main
+      args:
+        chdir: C:\test_ansible
