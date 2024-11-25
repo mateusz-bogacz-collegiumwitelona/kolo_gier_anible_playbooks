@@ -1,1 +1,0 @@
- ansible-playbook -i [ścieżka_do_inventory] [ścieżka_do_playbook]
