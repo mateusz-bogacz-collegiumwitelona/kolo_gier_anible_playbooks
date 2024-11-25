@@ -1,0 +1,8 @@
+[test]
+#adress_ip
+
+[test:vars]
+ansible_user=#użytkownik_lokalny
+ansible_password=#hasło
+ansible_connection=winrm
+ansible_winrm_server_cert_validation=ignore
